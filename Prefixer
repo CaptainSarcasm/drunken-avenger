@@ -1,0 +1,56 @@
+import maya.cmds as cmds
+
+listOfMats = 'glassNeonMtl','emissiveNeonMtl','artPainting','ceramic','ceramicGlossy','concrete','emissive','emissiveUpperLamps','emissiveLivingFloor','emissiveLivingStair','emissiveTrainingFloor','fabricCouch','fabricCarpet','fabricCushion','fabricLampshade','fabricBlue','glassClear','glassColored','glassFrosted','organicLeaf','organicSoil','organicBark','leather','leatherBlack','leatherBrown','marbleBlack','metal','metalBrushed','metalBrass','metalChrome','metalDull','paint','paintGlossy','paper','paperGlossy','plastic','rubber','stoneTileFloor','wax','wood','woodFloor','woodBlack','woodCue'
+postOpNaming = []
+for i in listOfMats:
+    if str(i[-3]+i[-2]+i[-1]) == 'Mtl':
+        new = i
+    else:
+        new = i+'Mtl'
+    postOpNaming.append(new)
+postOpNaming.sort()
+
+def projectPrefix(name):
+    sel = cmds.ls(sl=1,tr=1)
+    for i in sel:
+        if '|' in i:
+            newI=i.split('|')[-1]
+        else:
+            newI = i
+        prefix=newI.split('_')
+        if len(prefix) > 1:
+            newPrefixName = newI.replace(prefix[0],name)
+        else:
+            newPrefixName = name+'_'+newI
+        cmds.rename(i,newPrefixName)
+
+versionNumberName = 'v001'
+if cmds.window('namingEditor',exists=True):
+    cmds.deleteUI('namingEditor')
+
+window = cmds.window('namingEditor',menuBar=True, title= 'namingEditor %s' %(versionNumberName) , w=330, h=100,s=0)
+cmds.columnLayout(adj=1)
+cmds.frameLayout( label='Project Material Prefixes' )
+scrollLayout = cmds.scrollLayout(horizontalScrollBarThickness=16,verticalScrollBarThickness=16,h=375)
+cmds.columnLayout(adj=1,w=140,cal='left')
+last = 'a'
+aExist =[]
+for i in postOpNaming:
+    if i[0] == last:
+        aExist.append('yes')
+if 'yes' in aExist:
+    cmds.text('a'.capitalize()+':',fn = 'boldLabelFont')
+for i in postOpNaming:
+    if i[0] == last:
+        cmds.button(i,label = i, c = 'projectPrefix("%s")'%i,h=30 )
+    else:
+        cmds.text(label= i[0].capitalize()+':',fn = 'boldLabelFont')
+        cmds.button(i,label = i, c = 'projectPrefix("%s")'%i,h=30 )
+        last = i[0]
+cmds.setParent('..')
+cmds.setParent('..')
+cmds.setParent('..')
+cmds.setParent('..')
+
+cmds.window('namingEditor',edit=True, title= 'Project Prefix' , w=175, h=100)
+cmds.showWindow( window )
